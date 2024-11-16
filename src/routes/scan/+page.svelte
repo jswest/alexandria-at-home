@@ -11,10 +11,9 @@
       },
       body: JSON.stringify({ isbn }),
     });
-    const book = await res.json();
-    if (book) {
-      console.log(book);
-      await goto("/");
+    const data = await res.json();
+    if (data?.book) {
+      await goto(`/books/${data.book.id}`);
     }
   };
 </script>

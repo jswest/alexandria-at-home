@@ -18,11 +18,12 @@
 	},
 	"dependencies": {
 		"@ericblade/quagga2": "^1.8.4",
-		"@libsql/client": "^0.14.0",
 		"axios": "^1.7.7",
 		"better-sqlite3": "^11.5.0",
 		"dotenv": "^16.4.5",
 		"drizzle-orm": "^0.36.1",
+		"lucide-svelte": "^0.456.0",
+		"pino": "^9.5.0",
 		"sqlite3": "^5.1.7"
 	}
 }

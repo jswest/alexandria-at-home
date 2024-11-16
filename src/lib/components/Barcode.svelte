@@ -2,7 +2,6 @@
   import Quagga from "@ericblade/quagga2";
   import { onMount, onDestroy } from "svelte";
 
-  let done;
   let videoContainer;
   let started = false;
   export let onDetected = (code) => console.log("Barcode detected:", code);
@@ -12,7 +11,6 @@
 
   function isValidIsbn(code) {
     if (
-      !done &&
       code &&
       code.length === 13 &&
       (`${code}`.startsWith("978") || `${code}`.startsWith("979"))
@@ -68,8 +66,8 @@
         if (code !== lastCode) {
           lastCode = code;
           if (isValidIsbn(code)) {
-            done = true;
             onDetected(code);
+            Quagga.stop();
           }
         }
       });

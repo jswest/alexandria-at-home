@@ -43,6 +43,8 @@ export async function createBookFromIsbnAndRaw({ isbn, raw }) {
     },
     publisherId: publisher?.id,
   });
+
+  return book;
 }
 
 export async function findOrCreateAuthor({ authorData }) {

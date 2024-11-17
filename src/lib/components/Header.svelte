@@ -38,6 +38,7 @@
   }
   .nav-element:first-child {
     float: left;
+    width: 210px;
   }
   .icon {
     margin-right: var(--unit);

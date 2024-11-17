@@ -100,7 +100,7 @@
     border-top: 5px solid var(--color-offset);
     box-sizing: border-box;
     float: left;
-    height: 300px;
+    height: 400px;
     margin: var(--unit);
     max-width: 300px;
     overflow: scroll;

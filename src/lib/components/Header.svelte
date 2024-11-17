@@ -3,18 +3,20 @@
 </script>
 
 <header class="Header">
-  <div class="nav-element">
-    <h1><a href="/">Alexandria at Home</a></h1>
-  </div>
-  <div class="nav-element">
-    <p>
-      <a class="icon" href="/scan">
-        <Scan size="24" />
-      </a>
-      <a class="icon" href="/books">
-        <List size="24" />
-      </a>
-    </p>
+  <div>
+    <div class="nav-element">
+      <h1><a href="/">Alexandria at Home</a></h1>
+    </div>
+    <div class="nav-element">
+      <p>
+        <a class="icon" href="/scan">
+          <Scan size="24" />
+        </a>
+        <a class="icon" href="/books">
+          <List size="24" />
+        </a>
+      </p>
+    </div>
   </div>
   <div style="clear:both;"></div>
 </header>
@@ -25,7 +27,7 @@
     border-bottom: 1px solid var(--color-offset);
     box-sizing: border-box;
     height: calc((var(--unit) * 3) + 1px);
-    padding: calc(var(--unit) * 0.5) calc(var(--unit) * 2);
+    padding: calc(var(--unit) * 0.5) var(--unit);
     position: fixed;
     width: 100%;
     z-index: 10;
@@ -39,6 +41,9 @@
   }
   .icon {
     margin-right: var(--unit);
+  }
+  .icon:last-child {
+    margin-right: 0;
   }
   h1 {
     color: var(--color-offset);

@@ -72,7 +72,7 @@
     border: 1px solid var(--color-offset);
     box-sizing: border-box;
     float: left;
-    height: 300px;
+    height: 400px;
     margin: var(--unit);
     overflow: scroll;
     padding: var(--unit);

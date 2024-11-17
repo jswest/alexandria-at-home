@@ -1,6 +1,8 @@
 <script>
   import { BookOpenCheck, Calendar, Check, Edit, User, X } from "lucide-svelte";
 
+  import Token from "$lib/components/Token.svelte";
+
   export let data;
   const { book } = data;
 
@@ -88,6 +90,16 @@
         {/if}
       </div>
     {/each}
+    {#if book.tags?.length > 0}
+      <div class="tags sub-card">
+        <p>
+          {#each book.tags as t}
+            {@const tag = t.tag}
+            <Token link="/tags/{tag.id}" text={tag.name} type="tag" />
+          {/each}
+        </p>
+      </div>
+    {/if}
     {#if editing}
       <div class="publisher sub-card">
         <div class="sub-card">

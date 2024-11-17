@@ -4,26 +4,30 @@
   import BookCard from "$lib/components/BookCard.svelte";
 
   export let data;
-  const { publisher } = data;
-  const { books } = publisher;
+
+  let books = {};
+  let tag = {};
+
+  $: tag = data.tag;
+  $: books = tag.books;
 
   let editing = false;
-  let editedName = publisher.name;
+  let editedName = tag.name;
 
   function handleCancel() {
-    editedName = publisher.name;
+    editedName = tag.name;
     editing = false;
   }
 
   async function handleSave() {
     try {
-      const response = await fetch(`/api/publishers/${publisher.id}`, {
+      const response = await fetch(`/api/tags/${tag.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: editedName || publisher.name,
+          name: editedName || tag.name,
         }),
       });
       if (response.ok) {
@@ -36,7 +40,7 @@
 </script>
 
 <div class="Page">
-  <div class="Publisher">
+  <div class="Tag">
     {#if editing}
       <header class="sub-card">
         <input bind:value={editedName} placeholder="name" type="text" />
@@ -50,24 +54,25 @@
     {:else}
       <header class="sub-card">
         <h1>
-          {publisher.name}
+          {tag.name}
         </h1>
       </header>
       <div class="sub-card">
         <button on:click={() => (editing = true)}>
           <Edit size="12" />
-          Edit publisher.
+          Edit tag.
         </button>
       </div>
     {/if}
   </div>
-  {#each books as book}
+  {#each books as b}
+    {@const book = b.book}
     <BookCard {book} />
   {/each}
 </div>
 
 <style>
-  .Publisher {
+  .Tag {
     border: 1px solid var(--color-offset);
     border-top: 5px solid var(--color-offset);
     box-sizing: border-box;

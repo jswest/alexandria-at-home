@@ -1,8 +1,8 @@
 import { db } from "$lib/db/db.js";
 
 export async function load({ params }) {
-  const author = await db.query.authorsTable.findFirst({
-    where: (authors, { eq }) => eq(authors.id, params.id),
+  const tag = await db.query.tagsTable.findFirst({
+    where: (tags, { eq }) => eq(tags.id, params.id),
     with: {
       books: {
         with: {
@@ -25,5 +25,5 @@ export async function load({ params }) {
       },
     },
   });
-  return { author };
+  return { tag };
 }

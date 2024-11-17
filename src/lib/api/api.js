@@ -4,6 +4,7 @@ import {
   authorsTable,
   booksTable,
   publishersTable,
+  tagsTable,
 } from "./..//db/schema.js";
 
 export async function createBookFromIsbnAndRaw({ isbn, raw }) {
@@ -90,4 +91,16 @@ export async function findOrCreatePublisher({ publisherData }) {
       set: { name: publisherData.name },
     });
   return publisher;
+}
+
+export async function findOrCreateTag({ tagData }) {
+  const [tag] = await db
+    .insert(tagsTable)
+    .values(tagData)
+    .returning()
+    .onConflictDoUpdate({
+      target: tagsTable.name,
+      set: { name: tagData.name },
+    });
+  return tag;
 }

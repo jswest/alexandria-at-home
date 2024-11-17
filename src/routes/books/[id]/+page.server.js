@@ -10,6 +10,11 @@ export async function load({ params }) {
         },
       },
       publisher: true,
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
     },
   });
   return { book };

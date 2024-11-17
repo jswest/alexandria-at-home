@@ -6,6 +6,14 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 
+export const tagsTable = sqliteTable("tags", {
+  id: integer().primaryKey({ autoIncrement: true }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  name: text().notNull().unique(),
+});
+
 export const publishersTable = sqliteTable("publishers", {
   id: integer().primaryKey({ autoIncrement: true }),
   createdAt: integer("created_at", { mode: "timestamp" })
@@ -52,11 +60,31 @@ export const authorsBooksTable = sqliteTable(
   })
 );
 
+export const booksTagsTable = sqliteTable(
+  "books_tags",
+  {
+    bookId: integer("book_id")
+      .notNull()
+      .references(() => booksTable.id),
+    tagId: integer("tag_id")
+      .notNull()
+      .references(() => tagsTable.id),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.bookId, table.tagId] }),
+  })
+);
+
+export const tagsRelations = relations(tagsTable, ({ many }) => ({
+  books: many(booksTagsTable),
+}));
+
 export const publishersRelations = relations(publishersTable, ({ many }) => ({
   books: many(booksTable),
 }));
 
 export const booksRelations = relations(booksTable, ({ one, many }) => ({
+  tags: many(booksTagsTable),
   publisher: one(publishersTable, {
     fields: [booksTable.publisherId],
     references: [publishersTable.id],
@@ -66,6 +94,17 @@ export const booksRelations = relations(booksTable, ({ one, many }) => ({
 
 export const authorsRelations = relations(authorsTable, ({ many }) => ({
   books: many(authorsBooksTable),
+}));
+
+export const booksTagsRelations = relations(booksTagsTable, ({ one }) => ({
+  book: one(booksTable, {
+    fields: [authorsBooksTable.bookId],
+    references: [booksTable.id],
+  }),
+  tag: one(tagsTable, {
+    fields: [booksTagsTable.tagId],
+    references: [tagsTable.id],
+  }),
 }));
 
 export const authorsBooksRelations = relations(

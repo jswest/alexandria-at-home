@@ -1,8 +1,28 @@
 <script>
-  import { BookOpenCheck, Calendar, User } from "lucide-svelte";
+  import { BookOpenCheck, Calendar, Check, Tag, User } from "lucide-svelte";
+
+  import Token from "$lib/components/Token.svelte";
 
   export let book;
-  const { authors, subtitle, publishedAt, publisher, title } = book;
+
+  let nextTagName = "";
+
+  async function handleTag() {
+    const response = await fetch(`/api/books-tags`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ bookId: book.id, tagName: nextTagName }),
+    });
+
+    if (response.ok) {
+      nextTagName = "";
+      const data = await response.json();
+      console.log(data);
+      book = data.book;
+    }
+  }
 </script>
 
 <div class="BookCard">
@@ -10,38 +30,59 @@
     <div class="title sub-card">
       <h1>
         <a href="/books/{book.id}">
-          <span class="title">{title}</span><span class="subtitle"
-            >{subtitle ? `: ${subtitle}` : ""}</span
+          <span class="title">{book.title}</span><span class="subtitle"
+            >{book.subtitle ? `: ${book.subtitle}` : ""}</span
           >
         </a>
       </h1>
     </div>
-    {#each authors as a}
+    {#each book.authors as a}
+      {@const author = a.author}
       <div class="author sub-card">
         <h2 class="author-name">
-          <User size="14" strokeWidth="2" />
-          <a href="/authors/{a.author.id}">{a.author.name}</a>
+          <User size="14" />
+          <a href="/authors/{author.id}">{author.name}</a>
         </h2>
-        {#if a.author?.bornAt}
+        {#if author.bornAt}
           <h2 class="author-born-at">
             <Calendar size="14" strokeWidth="2" />
-            {a.author?.bornAt?.getFullYear()}
+            {author.bornAt instanceof Date
+              ? author.bornAt?.getFullYear()
+              : author.bornAt?.split("-")[0]}
           </h2>
         {/if}
       </div>
     {/each}
-    {#if publisher}
+    {#if book.tags?.length > 0}
+      <div class="tags sub-card">
+        <p>
+          {#each book.tags as t}
+            {@const tag = t.tag}
+            <Token link="/tags/{tag.id}" text={tag.name} type="tag" />
+          {/each}
+        </p>
+      </div>
+    {/if}
+    {#if book.publisher}
       <div class="publisher sub-card">
         <h2 class="publisher-name">
           <BookOpenCheck size="14" />
-          <a href="publishers/{publisher.id}">{publisher.name}</a>
+          <a href="publishers/{book.publisher.id}">{book.publisher.name}</a>
         </h2>
         <h2 class="published-at">
           <Calendar size="14" />
-          {publishedAt?.getFullYear()}
+          {book.publishedAt instanceof Date
+            ? book.publishedAt?.getFullYear()
+            : book.publishedAt?.split("-")[0]}
         </h2>
       </div>
     {/if}
+    <div class="add-tags sub-card">
+      <input bind:value={nextTagName} placeholder="Add a tag." type="text" />
+      <button on:click={handleTag}>
+        <Check size="14" />
+      </button>
+    </div>
   </div>
 </div>
 
@@ -51,7 +92,7 @@
     border-top: 5px solid var(--color-offset);
     box-sizing: border-box;
     float: left;
-    height: 300px;
+    height: 400px;
     margin: var(--unit);
     overflow: scroll;
     max-width: 300px;
@@ -86,5 +127,15 @@
   }
   .published-at {
     font-weight: 400;
+  }
+  input {
+    background-color: transparent;
+    border-bottom: 1px dotted var(--color-bg);
+  }
+  button {
+    border: none;
+  }
+  p {
+    margin-bottom: 0;
   }
 </style>

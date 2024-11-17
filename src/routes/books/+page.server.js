@@ -10,7 +10,12 @@ export async function load() {
         },
       },
       publisher: true,
-    },
+      tags: {
+        with: {
+          tag: true,
+        },
+      },
+    }
   });
   return { books };
 }

@@ -2,6 +2,8 @@
   import { Scan, Search } from "lucide-svelte";
 
   import BookCard from "$lib/components/BookCard.svelte";
+  import CreateBook from "$lib/components/CreateBook.svelte";
+  import { sleep } from "$lib/util.js";
 
   let books;
 
@@ -9,7 +11,7 @@
   let nameQuery = "";
   let titleQuery = "";
 
-  async function handleNameQuery(event) {
+  async function handleNameQuery() {
     if (nameQuery.length >= 3) {
       const res = await fetch(`/api/authors?nameQuery=${nameQuery}`);
       const data = await res.json();
@@ -21,13 +23,16 @@
           b.book.publishedAt = new Date(b.book.publishedAt);
         }
       }
+      books = null;
+      await sleep(10);
       books = data.authors.reduce((a, c) => a.concat(c.books.map((b) => b.book)), []);
+      console.log(books)
     } else {
       books = null;
     }
   }
 
-  async function handleTitleQuery(event) {
+  async function handleTitleQuery() {
     if (titleQuery.length >= 3) {
       const res = await fetch(`/api/books?titleQuery=${titleQuery}`);
       const data = await res.json();
@@ -37,7 +42,7 @@
           a.author.bornAt = new Date(a.author.bornAt);
         }
       }
-      books = data.books;
+      books = [...data.books];
     } else {
       books = null;
     }
@@ -80,6 +85,7 @@
       </div>
     </div>
   </header>
+  <CreateBook />
   {#if books}
     {#each books as book}
       <BookCard {book} />

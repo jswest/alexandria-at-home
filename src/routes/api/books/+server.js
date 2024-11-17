@@ -1,7 +1,12 @@
 import { eq } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 
-import { createBookFromIsbnAndRaw } from "$lib/api/api.js";
+import {
+  createBookFromIsbnAndRaw,
+  findOrCreateAuthor,
+  findOrCreateBook,
+  findOrCreatePublisher,
+} from "$lib/api/api.js";
 import Googler from "$lib/classes/Googler.js";
 import WikiDater from "$lib/classes/WikiDater.js";
 import { db } from "$lib/db/db.js";
@@ -34,10 +39,37 @@ export const GET = async ({ url }) => {
 export const POST = async ({ request }) => {
   try {
     const data = await request.json();
-    const { isbn } = data;
-    const googler = new Googler();
-    const raw = await googler.fetch(isbn);
-    const rawBook = await createBookFromIsbnAndRaw({ isbn, raw });
+    const { authorNames, isbn, publishedAt, publisherName, subtitle, title } =
+      data;
+    let rawBook;
+    if (title) {
+      const authors = [];
+      for (const authorName of authorNames.split(",")) {
+        const author = await findOrCreateAuthor({
+          authorData: { name: authorName },
+        });
+        authors.push(author);
+      }
+      const publisher = await findOrCreatePublisher({
+        publisherData: { name: publisherName },
+      });
+      const book = await findOrCreateBook({
+        authorIds:
+          authors.length > 0 ? authors.map((author) => author.id) : null,
+        bookData: {
+          isbn,
+          publishedAt: new Date(`${publishedAt}-02-01`),
+          subtitle,
+          title,
+        },
+        publisherId: publisher?.id,
+      });
+      rawBook = book;
+    } else {
+      const googler = new Googler();
+      const raw = await googler.fetch(isbn);
+      rawBook = await createBookFromIsbnAndRaw({ isbn, raw });
+    }
     if (rawBook) {
       const { id } = rawBook;
       let book = await db.query.booksTable.findFirst({

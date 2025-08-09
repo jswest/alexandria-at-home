@@ -27,7 +27,6 @@ export default class Opener {
         },
         timeout: 5000,
       });
-
       this.#logger.info(
         "Successfully fetched book from Google Books API for ISBN",
         isbn

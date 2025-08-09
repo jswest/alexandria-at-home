@@ -2,7 +2,25 @@ import { json } from "@sveltejs/kit";
 
 import { findOrCreateTag } from "$lib/api/api.js";
 import { db } from "$lib/db/db.js";
-import { booksTagsTable } from "$lib/db/schema.js";
+import { booksTagsTable, tagsTable } from "$lib/db/schema.js";
+
+export const GET = async ({ url }) => {
+  try {
+    const query = url.searchParams.get("query");
+    if (query && query.length >= 1) {
+      const tags = await db.query.tagsTable.findMany({
+        where: (tags, { like }) => like(tags.name, `%${query}%`),
+        limit: 10,
+        orderBy: (tags, { asc }) => asc(tags.name),
+      });
+      return json({ tags });
+    }
+    return json({ tags: [] });
+  } catch (error) {
+    console.error(error);
+    return json({ error: true, tags: [] });
+  }
+};
 
 export const POST = async ({ request }) => {
   try {

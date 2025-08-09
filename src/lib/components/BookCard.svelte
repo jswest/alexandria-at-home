@@ -1,25 +1,22 @@
 <script>
-  import { BookOpenCheck, Calendar, Check, Tag, User } from "lucide-svelte";
+  import { BookOpenCheck, Calendar, User } from "lucide-svelte";
 
   import Token from "$lib/components/Token.svelte";
+  import TagInput from "$lib/components/TagInput.svelte";
 
   export let book;
 
-  let nextTagName = "";
-
-  async function handleTag() {
+  async function handleTag(tagName) {
     const response = await fetch(`/api/books-tags`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ bookId: book.id, tagName: nextTagName }),
+      body: JSON.stringify({ bookId: book.id, tagName }),
     });
 
     if (response.ok) {
-      nextTagName = "";
       const data = await response.json();
-      console.log(data);
       book = data.book;
     }
   }
@@ -53,16 +50,6 @@
         {/if}
       </div>
     {/each}
-    {#if book.tags?.length > 0}
-      <div class="tags sub-card">
-        <p>
-          {#each book.tags as t}
-            {@const tag = t.tag}
-            <Token link="/tags/{tag.id}" text={tag.name} type="tag" />
-          {/each}
-        </p>
-      </div>
-    {/if}
     {#if book.publisher}
       <div class="publisher sub-card">
         <h2 class="publisher-name">
@@ -78,11 +65,18 @@
       </div>
     {/if}
     <div class="add-tags sub-card">
-      <input bind:value={nextTagName} placeholder="Add a tag." type="text" />
-      <button on:click={handleTag}>
-        <Check size="14" />
-      </button>
+      <TagInput onSubmit={handleTag} />
     </div>
+    {#if book.tags?.length > 0}
+      <div class="tags sub-card">
+        <p>
+          {#each book.tags as t}
+            {@const tag = t.tag}
+            <Token link="/tags/{tag.id}" text={tag.name} type="tag" />
+          {/each}
+        </p>
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -127,13 +121,6 @@
   }
   .published-at {
     font-weight: 400;
-  }
-  input {
-    background-color: transparent;
-    border-bottom: 1px dotted var(--color-bg);
-  }
-  button {
-    border: none;
   }
   p {
     margin-bottom: 0;

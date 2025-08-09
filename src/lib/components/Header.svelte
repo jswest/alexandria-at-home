@@ -1,5 +1,5 @@
 <script>
-  import { List, Scan } from "lucide-svelte";
+  import { List, Scan, Users } from "lucide-svelte";
 </script>
 
 <header class="Header">
@@ -14,6 +14,9 @@
         </a>
         <a class="icon" href="/books">
           <List size="24" />
+        </a>
+        <a class="icon" href="/authors">
+          <Users size="24" />
         </a>
       </p>
     </div>

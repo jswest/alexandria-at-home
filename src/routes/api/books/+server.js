@@ -45,10 +45,17 @@ export const POST = async ({ request }) => {
     if (title) {
       const authors = [];
       for (const authorName of authorNames.split(",")) {
-        const author = await findOrCreateAuthor({
-          authorData: { name: authorName },
-        });
-        authors.push(author);
+        const trimmedName = authorName.trim();
+        if (trimmedName) {
+          try {
+            const author = await findOrCreateAuthor({
+              authorData: { name: trimmedName },
+            });
+            authors.push(author);
+          } catch (error) {
+            console.warn(`Skipping invalid author: ${trimmedName}`, error);
+          }
+        }
       }
       const publisher = await findOrCreatePublisher({
         publisherData: { name: publisherName },

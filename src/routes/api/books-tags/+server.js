@@ -1,3 +1,4 @@
+import { and, eq } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 
 import { findOrCreateTag } from "$lib/api/api.js";
@@ -47,6 +48,44 @@ export const POST = async ({ request }) => {
         },
       },
     });
+    return json({ book });
+  } catch (error) {
+    console.error(error);
+    return json({ error: true });
+  }
+};
+
+export const DELETE = async ({ request }) => {
+  try {
+    const data = await request.json();
+    const { bookId, tagId } = data;
+    
+    await db
+      .delete(booksTagsTable)
+      .where(
+        and(
+          eq(booksTagsTable.bookId, bookId),
+          eq(booksTagsTable.tagId, tagId)
+        )
+      );
+
+    const book = await db.query.booksTable.findFirst({
+      where: (books, { eq }) => eq(books.id, bookId),
+      with: {
+        authors: {
+          with: {
+            author: true,
+          },
+        },
+        publisher: true,
+        tags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+    });
+    
     return json({ book });
   } catch (error) {
     console.error(error);

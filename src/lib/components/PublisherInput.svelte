@@ -1,18 +1,17 @@
 <script>
-  import { Tag } from "lucide-svelte";
+  import { Building } from "lucide-svelte";
   import AutocompleteInput from "$lib/components/AutocompleteInput.svelte";
 
   const { onSubmit } = $props();
 </script>
 
 <AutocompleteInput
-  apiEndpoint="/api/books-tags"
-  placeholder="Add a tag"
-  name="add-tag"
+  apiEndpoint="/api/publishers"
+  placeholder="Add a publisher"
+  name="add-publisher"
   {onSubmit}
 >
   {#snippet icon()}
-    <Tag size={12} />
+    <Building size={12} />
   {/snippet}
 </AutocompleteInput>
-

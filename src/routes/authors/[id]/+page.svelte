@@ -2,6 +2,7 @@
   import { Calendar, Check, Edit, X } from "lucide-svelte";
 
   import BookCard from "$lib/components/BookCard.svelte";
+  import Card from "$lib/components/Card.svelte";
 
   export let data;
   const { author } = data;
@@ -41,7 +42,7 @@
 </script>
 
 <div class="Page">
-  <div class="Author">
+  <Card variant="dark">
     {#if editing}
       <header class="sub-card">
         <input bind:value={editedName} placeholder="name" type="text" />
@@ -82,7 +83,7 @@
         </button>
       </div>
     {/if}
-  </div>
+  </Card>
   {#each books as b}
     {@const book = b.book}
     <BookCard {book} />
@@ -90,23 +91,12 @@
 </div>
 
 <style>
-  .Author {
-    border: 1px solid var(--color-offset);
-    border-top: 5px solid var(--color-offset);
-    box-sizing: border-box;
-    color: var(--color-offset);
-    float: left;
-    height: 300px;
-    margin: var(--unit);
-    overflow: scroll;
-    padding: var(--unit);
-    width: 300px;
-  }
   .sub-card {
     border-left: 1px solid var(--color-offset);
   }
   h1,
   h2 {
+    color: var(--color-offset);
     line-height: 1;
     margin-bottom: 0;
   }

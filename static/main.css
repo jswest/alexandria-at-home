@@ -1,6 +1,8 @@
 :root {
   --color-bg: #14212d;
   --color-offset: #6ba8e6;
+  --color-offset-light: #bacee2;
+  --color-offset-medium: #9dc0e2;
   --color-offset-transparent: #6ba8e655;
   --font-sans: "Roboto";
   --font-serif: "Cormorant", "Cormorant Garamond";

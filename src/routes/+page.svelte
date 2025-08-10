@@ -2,6 +2,7 @@
   import { Scan, Search } from "lucide-svelte";
 
   import BookCard from "$lib/components/BookCard.svelte";
+  import Card from "$lib/components/Card.svelte";
   import CreateBook from "$lib/components/CreateBook.svelte";
   import { sleep } from "$lib/util.js";
 
@@ -50,7 +51,7 @@
 </script>
 
 <div class="Page">
-  <header class="faux-card">
+  <Card variant="dark">
     <div class="sub-card">
       <h1 class="title">
         Alexandria at Home. <span class="lighter"
@@ -84,7 +85,7 @@
         />
       </div>
     </div>
-  </header>
+  </Card>
   <CreateBook />
   {#if books}
     {#each books as book}
@@ -94,40 +95,14 @@
 </div>
 
 <style>
-  .faux-card {
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-offset);
-    border-top: 5px solid var(--color-offset);
-    box-sizing: border-box;
-    float: left;
-    height: 400px;
-    margin: var(--unit);
-    max-width: 300px;
-    overflow: scroll;
-    padding: var(--unit);
-    text-align: left;
-    width: 100%;
-  }
-  .faux-card .sub-card {
-    border-left: 1px solid var(--color-offset);
-  }
-  .faux-card h1 {
+  .Page h2 {
     color: var(--color-offset);
-    font-size: calc(var(--unit) * 1.75);
-    line-height: 1;
-    transform: scaleX(0.7);
-    transform-origin: 0 50%;
-    width: calc(100% * 1.4285714286);
   }
-  .faux-card h1 .lighter {
-    font-weight: 100;
-  }
-  .faux-card h2 {
+  .Page .faux-form {
     color: var(--color-offset);
-    line-height: 1;
-    margin-bottom: 0;
   }
-  .faux-form {
+  .Page input {
+    background-color: transparent;
     color: var(--color-offset);
   }
 </style>

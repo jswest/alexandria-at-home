@@ -1,9 +1,11 @@
 <script>
-  import { Tag } from "lucide-svelte";
+  import { Tag, X } from "lucide-svelte";
 
   export let link;
   export let text;
   export let type;
+  export let removable = false;
+  export let onRemove = () => {};
 </script>
 
 <span class="Token">
@@ -16,6 +18,11 @@
     <a href={link}>{text}</a>
   {:else}
     {text}
+  {/if}
+  {#if removable}
+    <button class="remove-btn" on:click={onRemove} type="button">
+      <X size="12" />
+    </button>
   {/if}
 </span>
 
@@ -36,5 +43,20 @@
   .Token .icon-wrapper {
     position: relative;
     top: 3px;
+  }
+  .remove-btn {
+    background: none;
+    border: none;
+    color: var(--color-bg);
+    cursor: pointer;
+    margin-left: calc(var(--unit) * 0.25);
+    padding: 0;
+    opacity: 0.7;
+    position: relative;
+    top: 2px;
+  }
+  .remove-btn:hover {
+    opacity: 1;
+    color: var(--color-offset);
   }
 </style>

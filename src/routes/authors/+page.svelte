@@ -1,188 +1,181 @@
 <script>
-  import { User, ChevronLeft, ChevronRight } from "lucide-svelte";
+  import { Check, Filter, X } from "lucide-svelte";
+  import { goto } from "$app/navigation";
+  import AuthorCard from "$lib/components/AuthorCard.svelte";
+  import Card from "$lib/components/Card.svelte";
+  import Pagination from "$lib/components/Pagination.svelte";
 
   export let data;
-  const { authors, pagination } = data;
+  
+  $: ({ authors, pagination, filters } = data);
+  $: nameFilter = filters.name || "";
+  $: birthYearFrom = filters.birthYearFrom || "";
+  $: birthYearTo = filters.birthYearTo || "";
 
-  function formatBornYear(bornAt) {
-    if (!bornAt) return null;
-    return bornAt instanceof Date
-      ? bornAt.getFullYear()
-      : bornAt.split("-")[0];
+  function applyFilters() {
+    const params = new URLSearchParams();
+
+    if (nameFilter.trim()) params.set("name", nameFilter.trim());
+    if (birthYearFrom && String(birthYearFrom).trim()) params.set("birthYearFrom", String(birthYearFrom).trim());
+    if (birthYearTo && String(birthYearTo).trim()) params.set("birthYearTo", String(birthYearTo).trim());
+
+    // Reset to page 1 when applying filters
+    params.set("page", "1");
+
+    goto(`?${params.toString()}`);
   }
+
+  function clearFilters() {
+    nameFilter = "";
+    birthYearFrom = "";
+    birthYearTo = "";
+    goto("/authors");
+  }
+
 </script>
 
 <div class="Page">
-  <header class="faux-card">
-    <div class="sub-card">
-      <h1 class="title">Authors</h1>
-      <p>
-        Showing {authors.length} of {pagination.totalAuthors} authors
-        (Page {pagination.currentPage} of {pagination.totalPages})
-      </p>
-    </div>
-  </header>
-
+  <!-- Filters -->
+  <Card variant="white" size="medium">
+    {#snippet children()}
+      <div class="sub-card">
+        <h2>
+          <Filter size="14" />
+          Filters
+        </h2>
+      </div>
+      <div class="sub-card filters">
+        <div class="filter-field">
+          <label for="name">Author name</label>
+          <input
+            id="name"
+            bind:value={nameFilter}
+            placeholder="Search by name"
+            type="text"
+            on:keydown={(e) => e.key === "Enter" && applyFilters()}
+          />
+        </div>
+      </div>
+      <div class="sub-card filters">
+        <div class="filter-field">
+          <label for="birthYearFrom">Born after</label>
+          <input
+            id="birthYearFrom"
+            bind:value={birthYearFrom}
+            placeholder="1800"
+            type="number"
+            min="1000"
+            max="2100"
+            on:keydown={(e) => e.key === "Enter" && applyFilters()}
+          />
+        </div>
+      </div>
+      <div class="sub-card filters">
+        <div class="filter-field">
+          <label for="birthYearTo">Born until</label>
+          <input
+            id="birthYearTo"
+            bind:value={birthYearTo}
+            placeholder="2000"
+            type="number"
+            min="1000"
+            max="2100"
+            on:keydown={(e) => e.key === "Enter" && applyFilters()}
+          />
+        </div>
+      </div>
+      <div class="sub-card filter-actions">
+        <button on:click={applyFilters}>
+          <Check size={12} />
+          Apply filters
+        </button>
+        <button on:click={clearFilters}>
+          <X size={12} />
+          Clear
+        </button>
+      </div>
+    {/snippet}
+  </Card>
+  <Pagination 
+    {pagination} 
+    itemType="authors"
+    currentCount={authors.length}
+    totalCount={pagination.totalAuthors}
+    hasFilters={filters.name || filters.birthYearFrom || filters.birthYearTo}
+    size="medium"
+  />
   <div class="authors-grid">
     {#each authors as author}
-      <div class="author-card">
-        <div class="author-header sub-card">
-          <h2>
-            <User size="14" />
-            <a href="/authors/{author.id}">{author.name}</a>
-          </h2>
-          {#if author.bornAt}
-            <p class="born-year">Born {formatBornYear(author.bornAt)}</p>
-          {/if}
-        </div>
-        
-        <div class="book-count sub-card">
-          <p>{author.books.length} book{author.books.length === 1 ? '' : 's'}</p>
-        </div>
-      </div>
+      <AuthorCard {author} />
     {/each}
   </div>
-
-  {#if pagination.totalPages > 1}
-    <div class="pagination">
-      <div class="pagination-controls faux-card">
-        <div class="sub-card">
-          {#if pagination.hasPreviousPage}
-            <a href="?page={pagination.currentPage - 1}" class="pagination-btn">
-              <ChevronLeft size="14" />
-              Previous
-            </a>
-          {:else}
-            <span class="pagination-btn disabled">
-              <ChevronLeft size="14" />
-              Previous
-            </span>
-          {/if}
-
-          <span class="page-info">
-            Page {pagination.currentPage} of {pagination.totalPages}
-          </span>
-
-          {#if pagination.hasNextPage}
-            <a href="?page={pagination.currentPage + 1}" class="pagination-btn">
-              Next
-              <ChevronRight size="14" />
-            </a>
-          {:else}
-            <span class="pagination-btn disabled">
-              Next
-              <ChevronRight size="14" />
-            </span>
-          {/if}
+  {#if authors.length === 0}
+    <Card variant="white">
+      {#snippet children()}
+        <div class="sub-card no-results">
+          <p>No authors found matching your criteria.</p>
+          <button on:click={clearFilters}>Clear Filters</button>
         </div>
-      </div>
-    </div>
+      {/snippet}
+    </Card>
   {/if}
 </div>
 
 <style>
-  .faux-card {
-    background-color: var(--color-bg);
-    border: 1px solid var(--color-offset);
-    border-top: 5px solid var(--color-offset);
-    box-sizing: border-box;
-    float: left;
-    margin: var(--unit);
-    overflow: scroll;
-    padding: var(--unit);
-    text-align: left;
-    width: 100%;
+  h2 {
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--unit) * 0.25);
+    margin-bottom: 0;
   }
-  
-  .faux-card .sub-card {
-    border-left: 1px solid var(--color-offset);
-  }
-  
-  .faux-card h1 {
-    color: var(--color-offset);
-    font-size: calc(var(--unit) * 1.75);
-    line-height: 1;
-    transform: scaleX(0.7);
-    transform-origin: 0 50%;
-    width: calc(100% * 1.4285714286);
-  }
-
-  .authors-grid {
+  .filters {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--unit);
-    margin: var(--unit);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: calc(var(--unit) * 0.5);
   }
-
-  .author-card {
-    background-color: #ececec;
-    border-top: 5px solid var(--color-offset);
-    box-sizing: border-box;
-    padding: var(--unit);
-  }
-
-  .author-header h2 {
+  .filter-field label {
     color: var(--color-bg);
-    line-height: 1;
+    font-family: var(--font-serif);
+    font-size: calc(var(--unit) * 0.875);
+    font-weight: 600;
+  }
+  .filter-field input {
+    background-color: white;
+    border: none;
+    border-bottom: 1px dotted var(--color-bg);
+    color: var(--color-bg);
+    font-family: var(--font-serif);
+    padding: calc(var(--unit) * 0.125);
+  }
+  .filter-field input:focus {
+    outline: none;
+    border-color: var(--color-bg);
+  }
+  .filter-actions button {
+    background: transparent;
+    border: none;
+    color: var(--color-bg);
+    cursor: pointer;
+    font-family: var(--font-serif);
+    padding: calc(var(--unit) * 0.25)
+  }
+  .no-results {
+    text-align: center;
+    color: var(--color-bg);
+  }
+  .no-results p {
     margin-bottom: calc(var(--unit) * 0.5);
-    display: flex;
-    align-items: center;
-    gap: calc(var(--unit) * 0.25);
   }
-
-  .author-header h2:hover a {
-    text-decoration: underline;
-  }
-
-  .born-year {
+  .no-results button {
+    background: transparent;
+    border: 1px solid var(--color-offset);
     color: var(--color-bg);
-    font-size: calc(var(--unit) * 0.85);
-    margin-bottom: 0;
-  }
-
-  .book-count p {
-    color: var(--color-bg);
-    font-size: calc(var(--unit) * 0.85);
-    margin-bottom: 0;
-  }
-
-  .pagination {
-    clear: both;
-    margin-top: calc(var(--unit) * 2);
-  }
-
-  .pagination-controls {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .pagination-controls .sub-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--unit);
-  }
-
-  .pagination-btn {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--unit) * 0.25);
-    color: var(--color-offset);
-    text-decoration: none;
+    cursor: pointer;
     font-family: var(--font-serif);
+    padding: calc(var(--unit) * 0.375) calc(var(--unit) * 0.75);
+    border-radius: calc(var(--unit) * 0.125);
   }
 
-  .pagination-btn:hover:not(.disabled) {
-    text-decoration: underline;
-  }
 
-  .pagination-btn.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .page-info {
-    color: var(--color-offset);
-    font-family: var(--font-serif);
-  }
 </style>

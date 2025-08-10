@@ -29,7 +29,7 @@ export const booksTable = sqliteTable("books", {
     .$defaultFn(() => new Date()),
   description: text(),
   isbn: text().notNull().unique(),
-  publishedAt: integer("published_at", { mode: "timestamp" }).notNull(),
+  publishedAt: integer("published_at", { mode: "timestamp" }),
   publisherId: integer("publisher_id").references(() => publishersTable.id),
   subtitle: text(),
   thumbnailUrl: text("thumbnail_url"),

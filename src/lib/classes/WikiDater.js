@@ -1,21 +1,14 @@
 import axios from "axios";
-import pino from "pino";
+import logger from "../logger.js";
 
 export default class WikiDater {
   #baseUrl = "https://query.wikidata.org/sparql";
-  #logger = pino({
-    name: "WikiDater",
-    level: process.env.LOG_LEVEL || "info",
-  });
 
   constructor() {}
 
   async fetch(authorName) {
     try {
-      this.#logger.info(
-        "Fetching birthday from WikiData API for author",
-        authorName
-      );
+      logger.info({ authorName }, "Fetching birthday from WikiData API");
       const query = `
       SELECT ?birthday WHERE {
         ?author wdt:P31 wd:Q5;
@@ -35,20 +28,14 @@ export default class WikiDater {
         },
       });
 
-      this.#logger.info(
-        "Successfully fetched birthday from WikiData API for author",
-        authorName
-      );
+      logger.info({ authorName }, "Successfully fetched birthday from WikiData API");
       return (
         new Date(response.data.results.bindings[0]?.birthday?.value) || null
       );
     } catch (error) {
-      console.error(error.message);
-      console.error(error.stack);
-      this.#logger.error(
-        `Error fetching birthday from WikiData API for author ${authorName}`,
-        error.message,
-        error.stack
+      logger.error(
+        { authorName, error: error.message, stack: error.stack },
+        "Error fetching birthday from WikiData API"
       );
       return null;
     }

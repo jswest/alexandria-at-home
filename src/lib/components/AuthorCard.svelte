@@ -1,6 +1,7 @@
 <script>
   import { Calendar, User, Edit, Check, X, Trash2 } from "lucide-svelte";
   import Card from "$lib/components/Card.svelte";
+  import { getYear } from "$lib/util.js";
 
   const { author } = $props();
 
@@ -8,29 +9,23 @@
   let editedName = $state(author.name);
   let editedBornAt = $state("");
 
-  // Parse birth year from various date formats
-  function formatBornYear(bornAt) {
-    if (!bornAt) return null;
-    return bornAt instanceof Date ? bornAt.getFullYear() : bornAt.split("-")[0];
-  }
-
   // Initialize edited birth year
   $effect(() => {
     if (author.bornAt) {
-      editedBornAt = formatBornYear(author.bornAt) || "";
+      editedBornAt = getYear(author.bornAt) || "";
     }
   });
 
   function handleEdit() {
     editing = true;
     editedName = author.name;
-    editedBornAt = author.bornAt ? formatBornYear(author.bornAt) || "" : "";
+    editedBornAt = author.bornAt ? getYear(author.bornAt) || "" : "";
   }
 
   function handleCancel() {
     editing = false;
     editedName = author.name;
-    editedBornAt = author.bornAt ? formatBornYear(author.bornAt) || "" : "";
+    editedBornAt = author.bornAt ? getYear(author.bornAt) || "" : "";
   }
 
   async function handleSave() {
@@ -47,12 +42,11 @@
       });
       if (response.ok) {
         const data = await response.json();
-        // Update the author object to trigger reactivity
         Object.assign(author, data.author);
         editing = false;
       }
     } catch (error) {
-      console.error("Error saving author:", error);
+      // Error is visible to user via failed UI action
     }
   }
 
@@ -63,11 +57,10 @@
           method: "DELETE",
         });
         if (response.ok) {
-          // Emit a custom event to notify parent component
-          window.location.reload(); // Simple approach for now
+          window.location.reload();
         }
       } catch (error) {
-        console.error("Error deleting author:", error);
+        // Error is visible to user via failed UI action
       }
     }
   }
@@ -99,7 +92,7 @@
       <div class="author sub-card">
         <h2 class="author-name">
           <Calendar size="14" strokeWidth="2" />
-          Born {formatBornYear(author.bornAt)}
+          Born {getYear(author.bornAt)}
         </h2>
       </div>
     {/if}

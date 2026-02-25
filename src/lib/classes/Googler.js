@@ -1,13 +1,10 @@
 import "dotenv/config";
 import axios from "axios";
-import pino from "pino";
+import logger from "../logger.js";
+import { GOOGLE_BOOKS_TIMEOUT_MS } from "../config.js";
 
 export default class Opener {
   #baseUrl = "https://www.googleapis.com/books/v1/volumes";
-  #logger = pino({
-    name: "Googler",
-    level: process.env.LOG_LEVEL || "info",
-  });
 
   constructor() {}
 
@@ -17,7 +14,7 @@ export default class Opener {
 
   async fetch(isbn) {
     try {
-      this.#logger.info("Fetching book from Google Books API for ISBN", isbn);
+      logger.info({ isbn }, "Fetching book from Google Books API");
       const cleanIsbn = this.cleanIsbn(isbn);
       const bookKey = `isbn:${cleanIsbn}`;
       const response = await axios.get(this.#baseUrl, {
@@ -25,20 +22,14 @@ export default class Opener {
           q: bookKey,
           key: process.env.GOOGLE_API_KEY,
         },
-        timeout: 5000,
+        timeout: GOOGLE_BOOKS_TIMEOUT_MS,
       });
-      this.#logger.info(
-        "Successfully fetched book from Google Books API for ISBN",
-        isbn
-      );
+      logger.info({ isbn }, "Successfully fetched book from Google Books API");
       return response.data;
     } catch (error) {
-      console.error(error.message);
-      console.error(error.stack);
-      this.#logger.error(
-        `Error fetching book from Google Books API for ISBN ${isbn}`,
-        error.message,
-        error.stack
+      logger.error(
+        { isbn, error: error.message, stack: error.stack },
+        "Error fetching book from Google Books API"
       );
       return null;
     }

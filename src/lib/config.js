@@ -1,0 +1,4 @@
+export const PAGINATION_LIMIT = 20;
+export const GOOGLE_BOOKS_TIMEOUT_MS = 5000;
+export const WIKIDATA_FETCH_DELAY_MS = 1000;
+export const AUTOCOMPLETE_MIN_QUERY_LENGTH = 1;

@@ -4,6 +4,7 @@
   import { Save } from "lucide-svelte";
   import AuthorInput from "$lib/components/AuthorInput.svelte";
   import PublisherInput from "$lib/components/PublisherInput.svelte";
+  import TokenList from "$lib/components/TokenList.svelte";
   import Card from "$lib/components/Card.svelte";
 
   let authorNames = [];
@@ -47,7 +48,7 @@
         goto(`/books/${book.id}`)
       }
     } catch (error) {
-      console.error(error);
+      // Error is visible to user via failed UI action
     }
   }
 </script>
@@ -64,16 +65,7 @@
     </div>
     <div class="sub-card">
       <AuthorInput onSubmit={handleAddAuthor} />
-      {#if authorNames.length > 0}
-        <div class="author-list">
-          {#each authorNames as authorName}
-            <span class="author-tag">
-              {authorName}
-              <button class="remove-btn" on:click={() => handleRemoveAuthor(authorName)}>×</button>
-            </span>
-          {/each}
-        </div>
-      {/if}
+      <TokenList items={authorNames} onRemove={handleRemoveAuthor} />
     </div>
     <div class="sub-card">
       <input
@@ -109,25 +101,7 @@
   footer {
     color: var(--color-offset);
   }
-  .author-list {
-    margin-top: calc(var(--unit) * 0.5);
-    display: flex;
-    flex-wrap: wrap;
-    gap: calc(var(--unit) * 0.25);
-  }
-  
-  .author-tag {
-    background-color: var(--color-offset-transparent);
-    border: 1px solid var(--color-offset);
-    color: var(--color-bg);
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--unit) * 0.25);
-    font-family: var(--font-serif);
-    font-size: calc(var(--unit) * 0.75);
-    padding: calc(var(--unit) * 0.125) calc(var(--unit) * 0.25);
-  }
-  
+
   .publisher-display {
     margin-top: calc(var(--unit) * 0.5);
     color: var(--color-offset);
@@ -137,7 +111,7 @@
     align-items: center;
     gap: calc(var(--unit) * 0.25);
   }
-  
+
   .remove-btn {
     background: none;
     border: none;
@@ -147,7 +121,7 @@
     padding: 0;
     opacity: 0.7;
   }
-  
+
   .remove-btn:hover {
     opacity: 1;
   }

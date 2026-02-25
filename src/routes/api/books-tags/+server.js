@@ -4,6 +4,7 @@ import { json } from "@sveltejs/kit";
 import { findOrCreateTag } from "$lib/api/api.js";
 import { db } from "$lib/db/db.js";
 import { booksTagsTable, tagsTable } from "$lib/db/schema.js";
+import logger from "$lib/logger.js";
 
 export const GET = async ({ url }) => {
   try {
@@ -18,7 +19,7 @@ export const GET = async ({ url }) => {
     }
     return json({ tags: [] });
   } catch (error) {
-    console.error(error);
+    logger.error({ error: error.message }, "Error in GET /api/books-tags");
     return json({ error: true, tags: [] });
   }
 };
@@ -50,7 +51,7 @@ export const POST = async ({ request }) => {
     });
     return json({ book });
   } catch (error) {
-    console.error(error);
+    logger.error({ error: error.message }, "Error in POST /api/books-tags");
     return json({ error: true });
   }
 };
@@ -59,7 +60,7 @@ export const DELETE = async ({ request }) => {
   try {
     const data = await request.json();
     const { bookId, tagId } = data;
-    
+
     await db
       .delete(booksTagsTable)
       .where(
@@ -85,10 +86,10 @@ export const DELETE = async ({ request }) => {
         },
       },
     });
-    
+
     return json({ book });
   } catch (error) {
-    console.error(error);
+    logger.error({ error: error.message }, "Error in DELETE /api/books-tags");
     return json({ error: true });
   }
 };

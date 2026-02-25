@@ -12,6 +12,8 @@ import WikiDater from "$lib/classes/WikiDater.js";
 import { db } from "$lib/db/db.js";
 import { authorsTable } from "$lib/db/schema.js";
 import { sleep } from "$lib/util.js";
+import logger from "$lib/logger.js";
+import { WIKIDATA_FETCH_DELAY_MS } from "$lib/config.js";
 
 export const GET = async ({ url }) => {
   const titleQuery = url.searchParams.get("titleQuery");
@@ -53,7 +55,7 @@ export const POST = async ({ request }) => {
             });
             authors.push(author);
           } catch (error) {
-            console.warn(`Skipping invalid author: ${trimmedName}`, error);
+            logger.warn({ authorName: trimmedName, error: error.message }, "Skipping invalid author");
           }
         }
       }
@@ -65,7 +67,7 @@ export const POST = async ({ request }) => {
           authors.length > 0 ? authors.map((author) => author.id) : null,
         bookData: {
           isbn,
-          publishedAt: new Date(`${publishedAt}-02-01`),
+          publishedAt: new Date(`${publishedAt}-01-01`),
           subtitle,
           title,
         },
@@ -76,6 +78,11 @@ export const POST = async ({ request }) => {
       const googler = new Googler();
       const raw = await googler.fetch(isbn);
       rawBook = await createBookFromIsbnAndRaw({ isbn, raw });
+
+      // Handle ISBN-not-found error from createBookFromIsbnAndRaw
+      if (rawBook && rawBook.error) {
+        return json(rawBook);
+      }
     }
     if (rawBook) {
       const { id } = rawBook;
@@ -94,7 +101,7 @@ export const POST = async ({ request }) => {
       for (const a of book.authors) {
         const author = a?.author;
         if (author && !author.bornAt) {
-          await sleep(1000);
+          await sleep(WIKIDATA_FETCH_DELAY_MS);
           const birthday = await wikiDater.fetch(author.name);
           if (birthday) {
             await db
@@ -109,7 +116,7 @@ export const POST = async ({ request }) => {
       return json({ error: true });
     }
   } catch (error) {
-    console.error(error);
+    logger.error({ error: error.message, stack: error.stack }, "Error in POST /api/books");
     return json({ error: error.message });
   }
 };

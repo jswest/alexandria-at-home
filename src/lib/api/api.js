@@ -1,59 +1,35 @@
-import { db } from "./../db/db.js";
+import { db } from "../db/db.js";
 import {
   authorsBooksTable,
   authorsTable,
   booksTable,
   publishersTable,
   tagsTable,
-} from "./..//db/schema.js";
+} from "../db/schema.js";
+import logger from "../logger.js";
 
 export async function createBookFromIsbnAndRaw({ isbn, raw }) {
   try {
-    console.log('createBookFromIsbnAndRaw called with:', { isbn, hasRaw: !!raw });
-    
+    logger.info({ isbn, hasRaw: !!raw }, "createBookFromIsbnAndRaw called");
+
     if (!raw) {
-      console.log('No raw data provided');
+      logger.warn({ isbn }, "No raw data provided");
       return false;
     }
 
-    console.log('Raw data structure:', JSON.stringify(raw, null, 2));
-
     // Check if Google Books API found any results
     if (raw.totalItems === 0) {
-      console.log('Google Books API found no results for ISBN:', isbn);
-      
-      // Create a basic book entry with just the ISBN
-      const book = await findOrCreateBook({
-        authorIds: [],
-        bookData: {
-          isbn,
-          title: `Book ${isbn}`,
-          description: 'Book details not found in Google Books API. Please edit to add correct information.',
-          publishedAt: null,
-          subtitle: null,
-          thumbnailUrl: null,
-        },
-        publisherId: null,
-      });
-      
-      console.log('Created placeholder book:', book.id);
-      return book;
+      logger.warn({ isbn }, "Google Books API found no results for ISBN");
+      return { error: true, message: `No book found for ISBN ${isbn}. Please add details manually.` };
     }
 
     const item = raw?.items?.[0]?.volumeInfo;
     if (!item) {
-      console.log('No volumeInfo found in raw data');
-      console.log('Available keys in raw:', Object.keys(raw));
-      if (raw.items) {
-        console.log('Items length:', raw.items.length);
-        if (raw.items[0]) {
-          console.log('First item keys:', Object.keys(raw.items[0]));
-        }
-      }
+      logger.warn({ isbn, keys: Object.keys(raw) }, "No volumeInfo found in raw data");
       return false;
     }
 
-    console.log('Processing book:', item.title, 'by', item.authors);
+    logger.info({ title: item.title, authors: item.authors }, "Processing book");
 
     const authors = [];
     if (item.authors && Array.isArray(item.authors)) {
@@ -64,11 +40,11 @@ export async function createBookFromIsbnAndRaw({ isbn, raw }) {
           });
           authors.push(author);
         } catch (error) {
-          console.error('Error creating author:', name, error);
+          logger.error({ authorName: name, error: error.message }, "Error creating author");
         }
       }
     } else {
-      console.log('No authors found for book');
+      logger.info({ isbn }, "No authors found for book");
     }
 
     let publisher;
@@ -78,15 +54,11 @@ export async function createBookFromIsbnAndRaw({ isbn, raw }) {
           publisherData: { name: item.publisher },
         });
       } catch (error) {
-        console.error('Error creating publisher:', item.publisher, error);
+        logger.error({ publisher: item.publisher, error: error.message }, "Error creating publisher");
       }
     }
 
-    console.log('Creating book with data:', {
-      title: item.title,
-      authors: authors.length,
-      publisher: publisher?.name
-    });
+    logger.info({ title: item.title, authorCount: authors.length, publisher: publisher?.name }, "Creating book");
 
     const book = await findOrCreateBook({
       authorIds: authors.length > 0 ? authors.map((author) => author.id) : [],
@@ -101,10 +73,10 @@ export async function createBookFromIsbnAndRaw({ isbn, raw }) {
       publisherId: publisher?.id,
     });
 
-    console.log('Book created successfully:', book.id);
+    logger.info({ bookId: book.id }, "Book created successfully");
     return book;
   } catch (error) {
-    console.error('Error in createBookFromIsbnAndRaw:', error);
+    logger.error({ error: error.message, stack: error.stack }, "Error in createBookFromIsbnAndRaw");
     throw error;
   }
 }
@@ -114,7 +86,7 @@ export async function findOrCreateAuthor({ authorData }) {
   if (!authorData.name || !authorData.name.trim()) {
     throw new Error('Author name cannot be empty');
   }
-  
+
   const [author] = await db
     .insert(authorsTable)
     .values({ ...authorData, name: authorData.name.trim() })

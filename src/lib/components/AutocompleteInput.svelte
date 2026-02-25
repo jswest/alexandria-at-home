@@ -1,7 +1,8 @@
 <script>
   import { Check } from "lucide-svelte";
+  import { AUTOCOMPLETE_MIN_QUERY_LENGTH } from "$lib/config.js";
 
-  const { 
+  const {
     apiEndpoint,
     placeholder = "Search...",
     onSubmit,
@@ -17,10 +18,10 @@
   let inputElement;
 
   async function fetchSuggestions(query) {
-    if (query.length >= 1) {
+    if (query.length >= AUTOCOMPLETE_MIN_QUERY_LENGTH) {
       const response = await fetch(`${apiEndpoint}?query=${encodeURIComponent(query)}`);
       const data = await response.json();
-      
+
       // Handle different response structures
       const items = data.tags || data.authors || data.publishers || data.items || [];
       suggestions = items;
@@ -89,12 +90,9 @@
     }
   }
 
-  function handleBlur(event) {
-    // Delay hiding suggestions to allow click events
-    setTimeout(() => {
-      showSuggestions = false;
-      selectedIndex = -1;
-    }, 150);
+  function handleBlur() {
+    showSuggestions = false;
+    selectedIndex = -1;
   }
 </script>
 
@@ -118,14 +116,14 @@
       <Check size="14" />
     </button>
   </div>
-  
+
   {#if showSuggestions}
     <div class="suggestions">
       {#each suggestions as suggestion, index}
         <button
           class="suggestion"
           class:selected={index === selectedIndex}
-          onclick={() => selectSuggestion(suggestion)}
+          onpointerdown={() => selectSuggestion(suggestion)}
           type="button"
         >
           {suggestion[displayField]}

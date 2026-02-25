@@ -4,7 +4,10 @@
   import BookCard from "$lib/components/BookCard.svelte";
   import Card from "$lib/components/Card.svelte";
   import CreateBook from "$lib/components/CreateBook.svelte";
-  import { sleep } from "$lib/util.js";
+  import { sleep, hydrateBookDates } from "$lib/util.js";
+
+  let { data } = $props();
+  let recentBooks = $derived(data.recentBooks.map((b) => { hydrateBookDates(b); return b; }));
 
   let books;
 
@@ -18,16 +21,12 @@
       const data = await res.json();
       for (const author of data.authors) {
         for (const b of author.books) {
-          for (const a of b.book.authors) {
-            a.author.bornAt = new Date(a.author.bornAt);
-          }
-          b.book.publishedAt = new Date(b.book.publishedAt);
+          hydrateBookDates(b.book);
         }
       }
       books = null;
       await sleep(10);
       books = data.authors.reduce((a, c) => a.concat(c.books.map((b) => b.book)), []);
-      console.log(books)
     } else {
       books = null;
     }
@@ -38,10 +37,7 @@
       const res = await fetch(`/api/books?titleQuery=${titleQuery}`);
       const data = await res.json();
       for (const book of data.books) {
-        book.publishedAt = new Date(book.publishedAt);
-        for (const a of book.authors) {
-          a.author.bornAt = new Date(a.author.bornAt);
-        }
+        hydrateBookDates(book);
       }
       books = [...data.books];
     } else {
@@ -91,11 +87,16 @@
     {#each books as book}
       <BookCard {book} />
     {/each}
+  {:else if recentBooks.length > 0}
+    {#each recentBooks as book}
+      <BookCard {book} />
+    {/each}
   {/if}
 </div>
 
 <style>
-  .Page h2 {
+  .Page h2,
+  .Page .section-label {
     color: var(--color-offset);
   }
   .Page .faux-form {

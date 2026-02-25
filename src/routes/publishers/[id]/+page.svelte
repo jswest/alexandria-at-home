@@ -30,7 +30,7 @@
         window.location.reload();
       }
     } catch (error) {
-      console.error(error);
+      // Error is visible to user via failed UI action
     }
   }
 </script>

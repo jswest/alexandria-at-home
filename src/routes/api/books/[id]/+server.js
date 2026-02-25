@@ -1,8 +1,9 @@
 import { db } from "$lib/db/db.js";
-import { booksTable, publishersTable, authorsTable, authorsBooksTable } from "$lib/db/schema.js";
+import { booksTable, publishersTable, authorsTable, authorsBooksTable, booksTagsTable } from "$lib/db/schema.js";
 import { eq } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 import { findOrCreateAuthor } from "$lib/api/api.js";
+import logger from "$lib/logger.js";
 
 export async function PUT({ params, request }) {
   try {
@@ -36,7 +37,7 @@ export async function PUT({ params, request }) {
     if (data.authorNames) {
       // Remove existing author relationships
       await db.delete(authorsBooksTable).where(eq(authorsBooksTable.bookId, params.id));
-      
+
       // Add new author relationships
       const authorNames = data.authorNames.split(",").map(name => name.trim()).filter(name => name);
       for (const authorName of authorNames) {
@@ -49,7 +50,7 @@ export async function PUT({ params, request }) {
             bookId: parseInt(params.id)
           });
         } catch (error) {
-          console.warn(`Skipping invalid author: ${authorName}`, error);
+          logger.warn({ authorName, error: error.message }, "Skipping invalid author");
         }
       }
     }
@@ -74,7 +75,7 @@ export async function PUT({ params, request }) {
 
     return json({ book });
   } catch (error) {
-    console.error(error);
+    logger.error({ error: error.message, stack: error.stack }, "Error in PUT /api/books/:id");
     return json({ error: true });
   }
 }
@@ -83,17 +84,16 @@ export async function DELETE({ params }) {
   try {
     // Delete related records first (foreign key constraints)
     await db.delete(authorsBooksTable).where(eq(authorsBooksTable.bookId, params.id));
-    
-    // Delete book-tag relationships  
-    const { booksTagsTable } = await import("$lib/db/schema.js");
+
+    // Delete book-tag relationships
     await db.delete(booksTagsTable).where(eq(booksTagsTable.bookId, params.id));
-    
+
     // Finally delete the book
     await db.delete(booksTable).where(eq(booksTable.id, params.id));
-    
+
     return json({ success: true });
   } catch (error) {
-    console.error(error);
+    logger.error({ error: error.message, stack: error.stack }, "Error in DELETE /api/books/:id");
     return json({ error: true });
   }
 }

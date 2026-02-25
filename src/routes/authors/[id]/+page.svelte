@@ -28,7 +28,7 @@
         body: JSON.stringify({
           name: editedName || author.name,
           bornAt: editedBornAt
-            ? new Date(`${editedBornAt}-02-01`).toISOString()
+            ? new Date(`${editedBornAt}-01-01`).toISOString()
             : author.bornAt.toISOString(),
         }),
       });
@@ -36,7 +36,7 @@
         window.location.reload();
       }
     } catch (error) {
-      console.error(error);
+      // Error is visible to user via failed UI action
     }
   }
 </script>

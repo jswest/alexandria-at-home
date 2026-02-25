@@ -7,14 +7,17 @@
   import AuthorInput from "$lib/components/AuthorInput.svelte";
   import PublisherInput from "$lib/components/PublisherInput.svelte";
 
-  export let data;
+  const { data } = $props();
 
-  $: ({ books, pagination, filters } = data);
-  $: titleFilter = filters.title || "";
-  $: authorFilter = filters.author || "";
-  $: publisherFilter = filters.publisher || "";
-  $: yearFrom = filters.yearFrom || "";
-  $: yearTo = filters.yearTo || "";
+  let books = $derived(data.books);
+  let pagination = $derived(data.pagination);
+  let filters = $derived(data.filters);
+
+  let titleFilter = $state(data.filters.title || "");
+  let authorFilter = $state(data.filters.author || "");
+  let publisherFilter = $state(data.filters.publisher || "");
+  let yearFrom = $state(data.filters.yearFrom || "");
+  let yearTo = $state(data.filters.yearTo || "");
 
   function applyFilters() {
     const params = new URLSearchParams();
@@ -70,7 +73,7 @@
             bind:value={titleFilter}
             placeholder="Search in title or subtitle"
             type="text"
-            on:keydown={(e) => e.key === "Enter" && applyFilters()}
+            onkeydown={(e) => e.key === "Enter" && applyFilters()}
           />
         </div>
       </div>
@@ -81,7 +84,7 @@
           {#if authorFilter}
             <div class="current-filter">
               Current: {authorFilter}
-              <button class="clear-field-btn" on:click={() => authorFilter = ""}>×</button>
+              <button class="clear-field-btn" onclick={() => authorFilter = ""}>×</button>
             </div>
           {/if}
         </div>
@@ -93,7 +96,7 @@
           {#if publisherFilter}
             <div class="current-filter">
               Current: {publisherFilter}
-              <button class="clear-field-btn" on:click={() => publisherFilter = ""}>×</button>
+              <button class="clear-field-btn" onclick={() => publisherFilter = ""}>×</button>
             </div>
           {/if}
         </div>
@@ -108,7 +111,7 @@
             type="number"
             min="1000"
             max="2100"
-            on:keydown={(e) => e.key === "Enter" && applyFilters()}
+            onkeydown={(e) => e.key === "Enter" && applyFilters()}
           />
         </div>
       </div>
@@ -122,16 +125,16 @@
             type="number"
             min="1000"
             max="2100"
-            on:keydown={(e) => e.key === "Enter" && applyFilters()}
+            onkeydown={(e) => e.key === "Enter" && applyFilters()}
           />
         </div>
       </div>
       <div class="sub-card filter-actions">
-        <button on:click={applyFilters}>
+        <button onclick={applyFilters}>
           <Check size={12} />
           Apply filters
         </button>
-        <button on:click={clearFilters}>
+        <button onclick={clearFilters}>
           <X size={12} />
           Clear
         </button>
@@ -160,7 +163,7 @@
       {#snippet children()}
         <div class="sub-card no-results">
           <p>No books found matching your criteria.</p>
-          <button on:click={clearFilters}>Clear Filters</button>
+          <button onclick={clearFilters}>Clear Filters</button>
         </div>
       {/snippet}
     </Card>

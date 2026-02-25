@@ -1,41 +1,47 @@
 <script>
   import BookCard from "$lib/components/BookCard.svelte";
-  import Card from "$lib/components/Card.svelte";
 
   export let data;
   const { book } = data;
 </script>
 
-<div class="Page">
-  <BookCard {book} />
+<div class="detail-layout">
+  <div class="card-column">
+    <BookCard {book} />
+  </div>
   {#if book.description}
-    <Card variant="white">
-      <div class="sub-card">
-        <h2>Description</h2>
-        {#each book.description.split("\n") as graf}
-          <p>{graf}</p>
-        {/each}
-      </div>
-    </Card>
+    <div class="description">
+      {#each book.description.split("\n") as graf}
+        <p>{graf}</p>
+      {/each}
+    </div>
   {/if}
-  <Card variant="white">
-    <figure>
-      <img src={book.thumbnailUrl} alt={book.title} />
-    </figure>
-  </Card>
 </div>
 
 <style>
-  figure {
-    box-sizing: border-box;
-    display: block;
-    margin: var(--unit) auto;
-    padding: 0 calc(var(--unit) * 2);
-    width: 100%;
+  .detail-layout {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 0 var(--unit);
   }
-  figure img {
-    display: block;
-    margin: 0 auto;
-    width: 100%;
+
+  .card-column {
+    flex-shrink: 0;
+  }
+
+  .description {
+    flex: 1;
+    min-width: 250px;
+    max-width: 700px;
+    color: white;
+    font-family: var(--font-serif);
+    font-size: var(--unit);
+    line-height: calc(var(--unit) * 1.5);
+    padding: var(--unit);
+  }
+
+  .description p {
+    margin-bottom: calc(var(--unit) * 0.75);
   }
 </style>

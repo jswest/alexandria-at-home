@@ -2,17 +2,19 @@
   import { BookOpenCheck, Calendar, User, Edit, Check, X, Trash2 } from "lucide-svelte";
 
   import Token from "$lib/components/Token.svelte";
+  import TokenList from "$lib/components/TokenList.svelte";
   import TagInput from "$lib/components/TagInput.svelte";
   import AuthorInput from "$lib/components/AuthorInput.svelte";
   import PublisherInput from "$lib/components/PublisherInput.svelte";
   import Card from "$lib/components/Card.svelte";
+  import { getYear } from "$lib/util.js";
 
   export let book;
 
   let editing = false;
   let editedTitle = book.title;
   let editedSubtitle = book.subtitle || "";
-  let editedPublishedAt = book.publishedAt instanceof Date ? book.publishedAt.getFullYear() : book.publishedAt?.split("-")[0] || "";
+  let editedPublishedAt = getYear(book.publishedAt) || "";
   let editedPublisherName = book.publisher?.name || "";
   let editedAuthors = book.authors?.map(a => a.author.name) || [];
 
@@ -50,7 +52,7 @@
     editing = true;
     editedTitle = book.title;
     editedSubtitle = book.subtitle || "";
-    editedPublishedAt = book.publishedAt instanceof Date ? book.publishedAt.getFullYear() : book.publishedAt?.split("-")[0] || "";
+    editedPublishedAt = getYear(book.publishedAt) || "";
     editedPublisherName = book.publisher?.name || "";
     editedAuthors = book.authors?.map(a => a.author.name) || [];
   }
@@ -59,7 +61,7 @@
     editing = false;
     editedTitle = book.title;
     editedSubtitle = book.subtitle || "";
-    editedPublishedAt = book.publishedAt instanceof Date ? book.publishedAt.getFullYear() : book.publishedAt?.split("-")[0] || "";
+    editedPublishedAt = getYear(book.publishedAt) || "";
     editedPublisherName = book.publisher?.name || "";
     editedAuthors = book.authors?.map(a => a.author.name) || [];
   }
@@ -75,7 +77,7 @@
           title: editedTitle,
           subtitle: editedSubtitle,
           publishedAt: editedPublishedAt
-            ? new Date(`${editedPublishedAt}-02-01`).toISOString()
+            ? new Date(`${editedPublishedAt}-01-01`).toISOString()
             : book.publishedAt.toISOString(),
           publisherName: editedPublisherName,
           authorNames: editedAuthors.join(","),
@@ -87,7 +89,7 @@
         editing = false;
       }
     } catch (error) {
-      console.error(error);
+      // Error is visible to user via failed UI action
     }
   }
 
@@ -112,11 +114,10 @@
           method: "DELETE",
         });
         if (response.ok) {
-          // Emit a custom event to notify parent component
-          window.location.reload(); // Simple approach for now
+          window.location.reload();
         }
       } catch (error) {
-        console.error("Error deleting book:", error);
+        // Error is visible to user via failed UI action
       }
     }
   }
@@ -148,7 +149,7 @@
         </h1>
       </div>
     {/if}
-    
+
     {#if editing}
       <div class="authors sub-card editing">
         <div class="edit-field">
@@ -157,14 +158,7 @@
         {#if editedAuthors.length > 0}
           <div class="edit-field">
             <p class="current-value">Current authors:</p>
-            <div class="author-list">
-              {#each editedAuthors as authorName}
-                <span class="author-tag">
-                  {authorName}
-                  <button class="remove-btn" on:click={() => handleRemoveAuthor(authorName)}>×</button>
-                </span>
-              {/each}
-            </div>
+            <TokenList items={editedAuthors} onRemove={handleRemoveAuthor} />
           </div>
         {/if}
       </div>
@@ -179,9 +173,7 @@
           {#if author.bornAt}
             <h2 class="author-born-at">
               <Calendar size="14" strokeWidth="2" />
-              {author.bornAt instanceof Date
-                ? author.bornAt?.getFullYear()
-                : author.bornAt?.split("-")[0]}
+              {getYear(author.bornAt)}
             </h2>
           {/if}
         </div>
@@ -207,9 +199,7 @@
         </h2>
         <h2 class="published-at">
           <Calendar size="14" />
-          {book.publishedAt instanceof Date
-            ? book.publishedAt?.getFullYear()
-            : book.publishedAt?.split("-")[0]}
+          {getYear(book.publishedAt)}
         </h2>
       </div>
     {/if}
@@ -221,10 +211,10 @@
         <p>
           {#each book.tags as t}
             {@const tag = t.tag}
-            <Token 
-              link="/tags/{tag.id}" 
-              text={tag.name} 
-              type="tag" 
+            <Token
+              link="/tags/{tag.id}"
+              text={tag.name}
+              type="tag"
               removable={true}
               onRemove={() => handleRemoveTag(tag.id)}
             />
@@ -264,7 +254,7 @@
     align-items: center;
     gap: calc(var(--unit) * 0.25);
   }
-  
+
   .publisher-name {
     display: flex;
     align-items: center;
@@ -315,37 +305,5 @@
     cursor: pointer;
     font-family: var(--font-serif);
     padding: calc(var(--unit) * 0.25);
-  }
-
-  .author-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: calc(var(--unit) * 0.25);
-    margin-top: calc(var(--unit) * 0.25);
-  }
-
-  .author-tag {
-    background-color: var(--color-offset-transparent);
-    border: 1px solid var(--color-offset);
-    color: var(--color-bg);
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--unit) * 0.25);
-    font-family: var(--font-serif);
-    font-size: calc(var(--unit) * 0.75);
-    padding: calc(var(--unit) * 0.125) calc(var(--unit) * 0.25);
-  }
-
-  .remove-btn {
-    background: none;
-    border: none;
-    color: inherit;
-    cursor: pointer;
-    font-size: calc(var(--unit) * 0.75);
-    padding: 0;
-    opacity: 0.7;
-  }
-  .remove-btn:hover {
-    opacity: 1;
   }
 </style>

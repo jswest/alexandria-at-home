@@ -1,10 +1,11 @@
 import { count, like, and, gte, lte } from "drizzle-orm";
 import { db } from "$lib/db/db.js";
 import { authorsTable } from "$lib/db/schema.js";
+import { PAGINATION_LIMIT } from "$lib/config.js";
 
 export const load = async ({ url }) => {
   const page = parseInt(url.searchParams.get("page") || "1");
-  const limit = 20;
+  const limit = PAGINATION_LIMIT;
   const offset = (page - 1) * limit;
 
   // Get filter parameters

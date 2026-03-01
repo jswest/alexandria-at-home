@@ -90,10 +90,6 @@
     line-height: 1;
     margin-bottom: 0;
   }
-  .Card :global(input) {
-    background-color: white;
-    color: var(--color-bg);
-  }
   .Card :global(.title) {
     color: var(--color-bg);
     font-weight: 800;

@@ -89,6 +89,10 @@
 </Card>
 
 <style>
+  input {
+    background-color: white;
+    color: var(--color-bg);
+  }
   button {
     background-color: transparent;
     border: none;

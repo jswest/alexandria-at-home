@@ -36,10 +36,19 @@ export async function PUT({ params, request }) {
 
 export async function DELETE({ params }) {
   try {
-    // Delete author-book relationships first (foreign key constraints)
-    await db.delete(authorsBooksTable).where(eq(authorsBooksTable.authorId, params.id));
+    const author = await db.query.authorsTable.findFirst({
+      where: (authors, { eq }) => eq(authors.id, params.id),
+      with: { books: true },
+    });
 
-    // Finally delete the author
+    if (!author) {
+      return json({ error: "Author not found" }, { status: 404 });
+    }
+
+    if (author.books.length > 0) {
+      return json({ error: "Cannot delete an author that has books" }, { status: 400 });
+    }
+
     await db.delete(authorsTable).where(eq(authorsTable.id, params.id));
 
     return json({ success: true });

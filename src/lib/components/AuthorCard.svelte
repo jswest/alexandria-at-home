@@ -108,10 +108,12 @@
           <Edit size="12" />
           Edit
         </button>
-        <button class="delete-btn" onclick={handleDelete}>
-          <Trash2 size="12" />
-          Delete
-        </button>
+        {#if author.books.length === 0}
+          <button class="delete-btn" onclick={handleDelete}>
+            <Trash2 size="12" />
+            Delete
+          </button>
+        {/if}
       </div>
     {:else}
       <div class="edit-controls sub-card">

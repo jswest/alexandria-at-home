@@ -1,5 +1,5 @@
 <script>
-  import { Calendar, Check, Edit, X } from "lucide-svelte";
+  import { Calendar, Check, Edit, Trash2, X } from "lucide-svelte";
 
   import BookCard from "$lib/components/BookCard.svelte";
   import Card from "$lib/components/Card.svelte";
@@ -16,6 +16,21 @@
     editedName = author.name;
     editedBornAt = author.bornAt?.getFullYear() || "";
     editing = false;
+  }
+
+  async function handleDelete() {
+    if (confirm(`Are you sure you want to delete "${author.name}"? This action cannot be undone.`)) {
+      try {
+        const response = await fetch(`/api/authors/${author.id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          window.location.href = "/authors";
+        }
+      } catch (error) {
+        // Error is visible to user via failed UI action
+      }
+    }
   }
 
   async function handleSave() {
@@ -81,6 +96,12 @@
           <Edit size="12" />
           Edit author.
         </button>
+        {#if books.length === 0}
+          <button class="delete-btn" on:click={handleDelete}>
+            <Trash2 size="12" />
+            Delete author.
+          </button>
+        {/if}
       </div>
     {/if}
   </Card>

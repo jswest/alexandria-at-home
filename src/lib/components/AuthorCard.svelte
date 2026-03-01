@@ -37,7 +37,7 @@
         },
         body: JSON.stringify({
           name: editedName,
-          bornAt: editedBornAt ? new Date(`${editedBornAt}-01-01`).toISOString() : null,
+          bornAt: editedBornAt ? new Date(`${editedBornAt}-01-01T00:00:00Z`).toISOString() : null,
         }),
       });
       if (response.ok) {

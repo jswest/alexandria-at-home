@@ -77,7 +77,7 @@
           title: editedTitle,
           subtitle: editedSubtitle,
           publishedAt: editedPublishedAt
-            ? new Date(`${editedPublishedAt}-01-01`).toISOString()
+            ? new Date(`${editedPublishedAt}-01-01T00:00:00Z`).toISOString()
             : book.publishedAt.toISOString(),
           publisherName: editedPublisherName,
           authorNames: editedAuthors.join(","),

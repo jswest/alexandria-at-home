@@ -28,11 +28,11 @@ export async function load({ url }) {
   }
 
   if (yearFrom) {
-    whereConditions.push(gte(booksTable.publishedAt, new Date(`${yearFrom}-01-01`)));
+    whereConditions.push(gte(booksTable.publishedAt, new Date(`${yearFrom}-01-01T00:00:00Z`)));
   }
 
   if (yearTo) {
-    whereConditions.push(lte(booksTable.publishedAt, new Date(`${yearTo}-12-31`)));
+    whereConditions.push(lte(booksTable.publishedAt, new Date(`${yearTo}-12-31T00:00:00Z`)));
   }
 
   let whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;

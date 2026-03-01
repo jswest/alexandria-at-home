@@ -67,7 +67,7 @@ export const POST = async ({ request }) => {
           authors.length > 0 ? authors.map((author) => author.id) : null,
         bookData: {
           isbn,
-          publishedAt: new Date(`${publishedAt}-01-01`),
+          publishedAt: new Date(`${publishedAt}-01-01T00:00:00Z`),
           subtitle,
           title,
         },

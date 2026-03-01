@@ -21,11 +21,11 @@ export const load = async ({ url }) => {
   }
   
   if (birthYearFrom) {
-    whereConditions.push(gte(authorsTable.bornAt, new Date(`${birthYearFrom}-01-01`)));
+    whereConditions.push(gte(authorsTable.bornAt, new Date(`${birthYearFrom}-01-01T00:00:00Z`)));
   }
-  
+
   if (birthYearTo) {
-    whereConditions.push(lte(authorsTable.bornAt, new Date(`${birthYearTo}-12-31`)));
+    whereConditions.push(lte(authorsTable.bornAt, new Date(`${birthYearTo}-12-31T00:00:00Z`)));
   }
 
   const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;

@@ -28,7 +28,7 @@
         body: JSON.stringify({
           name: editedName || author.name,
           bornAt: editedBornAt
-            ? new Date(`${editedBornAt}-01-01`).toISOString()
+            ? new Date(`${editedBornAt}-01-01T00:00:00Z`).toISOString()
             : author.bornAt.toISOString(),
         }),
       });
